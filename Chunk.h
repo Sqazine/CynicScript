@@ -57,7 +57,7 @@ namespace CynicScript
         OP_APPREGATE_RESOLVE,
         OP_APPREGATE_RESOLVE_VAR_ARG,
         OP_MODULE,
-        OP_RESET,
+        OP_INIT_VAR_ARG,
     };
 
     using OpCodeList = std::vector<uint8_t>;

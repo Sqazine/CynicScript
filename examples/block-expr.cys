@@ -4,4 +4,4 @@ let a=({
      b
 });
 
-io.println(a);
+io.println(a); // 110

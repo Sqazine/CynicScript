@@ -34,9 +34,9 @@ namespace CynicScript
     {
     public:
         Type() noexcept;
-        Type(TypeKind kind) noexcept;
-        Type(STRING_VIEW name) noexcept;
-        Type(TypeKind kind, STRING_VIEW name) noexcept;
+        Type(TypeKind kind,const SourceLocation& sourceLocation) noexcept;
+        Type(STRING_VIEW name,const SourceLocation& sourceLocation) noexcept;
+        Type(TypeKind kind, STRING_VIEW name,const SourceLocation& sourceLocation) noexcept;
         ~Type() noexcept = default;
 
         TypeKind GetKind() const noexcept;
@@ -60,5 +60,6 @@ namespace CynicScript
 
         STRING_VIEW mName;
         TypeKind mKind;
+        SourceLocation mSourceLocation;
     };
 };

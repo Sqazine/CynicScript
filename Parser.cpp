@@ -957,9 +957,9 @@ namespace CynicScript
 				numExpr->f64Value = v;
 
 				if (v < std::numeric_limits<float>::max())
-					numExpr->type = Type(TypeKind::F32);
+					numExpr->type = Type(TypeKind::F32, token->sourceLocation);
 				else if (v < std::numeric_limits<double>::max())
-					numExpr->type = Type(TypeKind::F64);
+					numExpr->type = Type(TypeKind::F64, token->sourceLocation);
 			}
 			else
 			{
@@ -967,13 +967,13 @@ namespace CynicScript
 				numExpr->i64Value = v;
 
 				if (v < std::numeric_limits<uint8_t>::max())
-					numExpr->type = Type(TypeKind::U8);
+					numExpr->type = Type(TypeKind::U8, token->sourceLocation);
 				else if (v < std::numeric_limits<uint16_t>::max())
-					numExpr->type = Type(TypeKind::U16);
+					numExpr->type = Type(TypeKind::U16, token->sourceLocation);
 				else if (v < std::numeric_limits<uint32_t>::max())
-					numExpr->type = Type(TypeKind::U32);
+					numExpr->type = Type(TypeKind::U32, token->sourceLocation);
 				else if (v < std::numeric_limits<uint64_t>::max())
-					numExpr->type = Type(TypeKind::U64);
+					numExpr->type = Type(TypeKind::U64, token->sourceLocation);
 			}
 			return numExpr;
 		}
@@ -1272,7 +1272,7 @@ namespace CynicScript
 	{
 		//TODO:only support basic single word type
 		auto token = GetCurTokenAndStepOnce();
-		return Type(token->literal);
+		return Type(token->literal, token->sourceLocation);
 	}
 
 	ClassDecl::MemberPrivilege Parser::ParseClassMemberPrivilege()

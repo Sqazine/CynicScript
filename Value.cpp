@@ -68,6 +68,8 @@ namespace CynicScript
             result.insert(result.end(), byteList.begin(), byteList.end());
         }
 
+        // TODO: Not finished yet, need to handle object serialization
+
         return result;
     }
 
@@ -78,6 +80,8 @@ namespace CynicScript
 
         if (CYS_IS_INT_VALUE(*this) || CYS_IS_REAL_VALUE(*this) || CYS_IS_BOOL_VALUE(*this))
             integer = ByteConverter::GetU64Integer(data, 2);
+
+        // TODO: Not finished yet, need to handle object deserialization
     }
 
     bool operator==(const Value &left, const Value &right)

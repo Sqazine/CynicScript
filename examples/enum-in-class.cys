@@ -11,4 +11,4 @@ class TestClass
 
 let testClass=new TestClass();
 
-io.println(testClass.t);
+io.println(testClass.t);// TEST_1

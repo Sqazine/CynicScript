@@ -880,8 +880,8 @@ namespace CynicScript
 
 	void Compiler::CompileAppregateExpr(AppregateExpr *expr)
 	{
-		for (int32_t i = (int32_t)expr->exprs.size() - 1; i >= 0; --i)
-			CompileExpr(expr->exprs[i]);
+		for (Expr *&elementExpr : expr->exprs)
+			CompileExpr(elementExpr);
 		EmitOpCode(OP_ARRAY, expr->tagToken);
 
 		uint8_t pos = (uint8_t)expr->exprs.size();
@@ -1251,7 +1251,7 @@ namespace CynicScript
 
 					if (IsInClassOrModuleScope)
 					{
-						EmitOpCode(OP_RESET, decl->tagToken);
+						EmitOpCode(OP_INIT_VAR_ARG, decl->tagToken);
 						Emit(varCount);
 					}
 				}

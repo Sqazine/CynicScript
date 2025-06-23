@@ -41,53 +41,53 @@ namespace CynicScript
 	void VM::Execute()
 	{
 		//  - * /
-#define COMMON_BINARY(op)                                                                                                                                                                                                    \
-	do                                                                                                                                                                                                                       \
-	{                                                                                                                                                                                                                        \
-		Value right = POP_STACK();                                                                                                                                                                                           \
-		Value left = POP_STACK();                                                                                                                                                                                            \
-		if (CYS_IS_REF_VALUE(left))                                                                                                                                                                                              \
-			left = *CYS_TO_REF_VALUE(left)->pointer;                                                                                                                                                                             \
-		if (CYS_IS_REF_VALUE(right))                                                                                                                                                                                             \
-			right = *CYS_TO_REF_VALUE(right)->pointer;                                                                                                                                                                           \
-		if (CYS_IS_INT_VALUE(left) && CYS_IS_INT_VALUE(right))                                                                                                                                                                       \
-			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_INT_VALUE(right));                                                                                                                                                           \
-		else if (CYS_IS_REAL_VALUE(left) && CYS_IS_REAL_VALUE(right))                                                                                                                                                                \
-			PUSH_STACK(CYS_TO_REAL_VALUE(left) op CYS_TO_REAL_VALUE(right));                                                                                                                                                         \
-		else if (CYS_IS_INT_VALUE(left) && CYS_IS_REAL_VALUE(right))                                                                                                                                                                 \
-			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_REAL_VALUE(right));                                                                                                                                                          \
-		else if (CYS_IS_REAL_VALUE(left) && CYS_IS_INT_VALUE(right))                                                                                                                                                                 \
-			PUSH_STACK(CYS_TO_REAL_VALUE(left) op CYS_TO_INT_VALUE(right));                                                                                                                                                          \
-		else                                                                                                                                                                                                                 \
+#define COMMON_BINARY(op)                                                                                                                                                                                                     \
+	do                                                                                                                                                                                                                        \
+	{                                                                                                                                                                                                                         \
+		Value right = POP_STACK();                                                                                                                                                                                            \
+		Value left = POP_STACK();                                                                                                                                                                                             \
+		if (CYS_IS_REF_VALUE(left))                                                                                                                                                                                           \
+			left = *CYS_TO_REF_VALUE(left)->pointer;                                                                                                                                                                          \
+		if (CYS_IS_REF_VALUE(right))                                                                                                                                                                                          \
+			right = *CYS_TO_REF_VALUE(right)->pointer;                                                                                                                                                                        \
+		if (CYS_IS_INT_VALUE(left) && CYS_IS_INT_VALUE(right))                                                                                                                                                                \
+			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_INT_VALUE(right));                                                                                                                                                    \
+		else if (CYS_IS_REAL_VALUE(left) && CYS_IS_REAL_VALUE(right))                                                                                                                                                         \
+			PUSH_STACK(CYS_TO_REAL_VALUE(left) op CYS_TO_REAL_VALUE(right));                                                                                                                                                  \
+		else if (CYS_IS_INT_VALUE(left) && CYS_IS_REAL_VALUE(right))                                                                                                                                                          \
+			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_REAL_VALUE(right));                                                                                                                                                   \
+		else if (CYS_IS_REAL_VALUE(left) && CYS_IS_INT_VALUE(right))                                                                                                                                                          \
+			PUSH_STACK(CYS_TO_REAL_VALUE(left) op CYS_TO_INT_VALUE(right));                                                                                                                                                   \
+		else                                                                                                                                                                                                                  \
 			CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Invalid binary op:{}{}{},only (&)int-(&)int,(&)real-(&)real,(&)int-(&)real or (&)real-(&)int type pair is available."), left.ToString(), TEXT(#op), right.ToString()); \
 	} while (0);
 
 // & | << >>
-#define INTEGER_BINARY(op)                                                                                                                                                  \
-	do                                                                                                                                                                      \
-	{                                                                                                                                                                       \
-		Value right = POP_STACK();                                                                                                                                          \
-		Value left = POP_STACK();                                                                                                                                           \
-		if (CYS_IS_REF_VALUE(left))                                                                                                                                             \
-			left = *CYS_TO_REF_VALUE(left)->pointer;                                                                                                                            \
-		if (CYS_IS_REF_VALUE(right))                                                                                                                                            \
-			right = *CYS_TO_REF_VALUE(right)->pointer;                                                                                                                          \
-		if (CYS_IS_INT_VALUE(left) && CYS_IS_INT_VALUE(right))                                                                                                                      \
-			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_INT_VALUE(right));                                                                                                          \
-		else                                                                                                                                                                \
+#define INTEGER_BINARY(op)                                                                                                                                                   \
+	do                                                                                                                                                                       \
+	{                                                                                                                                                                        \
+		Value right = POP_STACK();                                                                                                                                           \
+		Value left = POP_STACK();                                                                                                                                            \
+		if (CYS_IS_REF_VALUE(left))                                                                                                                                          \
+			left = *CYS_TO_REF_VALUE(left)->pointer;                                                                                                                         \
+		if (CYS_IS_REF_VALUE(right))                                                                                                                                         \
+			right = *CYS_TO_REF_VALUE(right)->pointer;                                                                                                                       \
+		if (CYS_IS_INT_VALUE(left) && CYS_IS_INT_VALUE(right))                                                                                                               \
+			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_INT_VALUE(right));                                                                                                   \
+		else                                                                                                                                                                 \
 			CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Invalid binary op:{}{}{},only (&)int-(&)int type pair is available."), left.ToString(), TEXT(#op), right.ToString()); \
 	} while (0);
 
 // > <
-#define COMPARE_BINARY(op)                                                          \
-	do                                                                              \
-	{                                                                               \
-		Value right = POP_STACK();                                                  \
-		Value left = POP_STACK();                                                   \
-		if (CYS_IS_REF_VALUE(left))                                                     \
-			left = *CYS_TO_REF_VALUE(left)->pointer;                                    \
-		if (CYS_IS_REF_VALUE(right))                                                    \
-			right = *CYS_TO_REF_VALUE(right)->pointer;                                  \
+#define COMPARE_BINARY(op)                                                                  \
+	do                                                                                      \
+	{                                                                                       \
+		Value right = POP_STACK();                                                          \
+		Value left = POP_STACK();                                                           \
+		if (CYS_IS_REF_VALUE(left))                                                         \
+			left = *CYS_TO_REF_VALUE(left)->pointer;                                        \
+		if (CYS_IS_REF_VALUE(right))                                                        \
+			right = *CYS_TO_REF_VALUE(right)->pointer;                                      \
 		if (CYS_IS_INT_VALUE(left) && CYS_IS_INT_VALUE(right))                              \
 			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_INT_VALUE(right) ? true : false);   \
 		else if (CYS_IS_REAL_VALUE(left) && CYS_IS_REAL_VALUE(right))                       \
@@ -96,23 +96,23 @@ namespace CynicScript
 			PUSH_STACK(CYS_TO_INT_VALUE(left) op CYS_TO_REAL_VALUE(right) ? true : false);  \
 		else if (CYS_IS_REAL_VALUE(left) && CYS_IS_INT_VALUE(right))                        \
 			PUSH_STACK(CYS_TO_REAL_VALUE(left) op CYS_TO_INT_VALUE(right) ? true : false);  \
-		else                                                                        \
-			PUSH_STACK(false);                                                      \
+		else                                                                                \
+			PUSH_STACK(false);                                                              \
 	} while (0);
 
 // && ||
-#define LOGIC_BINARY(op)                                                                                                                                                      \
-	do                                                                                                                                                                        \
-	{                                                                                                                                                                         \
-		Value right = POP_STACK();                                                                                                                                            \
-		Value left = POP_STACK();                                                                                                                                             \
-		if (CYS_IS_REF_VALUE(left))                                                                                                                                               \
-			left = *CYS_TO_REF_VALUE(left)->pointer;                                                                                                                              \
-		if (CYS_IS_REF_VALUE(right))                                                                                                                                              \
-			right = *CYS_TO_REF_VALUE(right)->pointer;                                                                                                                            \
-		if (CYS_IS_BOOL_VALUE(left) && CYS_IS_BOOL_VALUE(right))                                                                                                                      \
-			PUSH_STACK(CYS_TO_BOOL_VALUE(left) op CYS_TO_BOOL_VALUE(right) ? Value(true) : Value(false));                                                                             \
-		else                                                                                                                                                                  \
+#define LOGIC_BINARY(op)                                                                                                                                                       \
+	do                                                                                                                                                                         \
+	{                                                                                                                                                                          \
+		Value right = POP_STACK();                                                                                                                                             \
+		Value left = POP_STACK();                                                                                                                                              \
+		if (CYS_IS_REF_VALUE(left))                                                                                                                                            \
+			left = *CYS_TO_REF_VALUE(left)->pointer;                                                                                                                           \
+		if (CYS_IS_REF_VALUE(right))                                                                                                                                           \
+			right = *CYS_TO_REF_VALUE(right)->pointer;                                                                                                                         \
+		if (CYS_IS_BOOL_VALUE(left) && CYS_IS_BOOL_VALUE(right))                                                                                                               \
+			PUSH_STACK(CYS_TO_BOOL_VALUE(left) op CYS_TO_BOOL_VALUE(right) ? Value(true) : Value(false));                                                                      \
+		else                                                                                                                                                                   \
 			CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Invalid binary op:{}{}{},only (&)bool-(&)bool type pair is available."), left.ToString(), TEXT(#op), right.ToString()); \
 	} while (0);
 
@@ -122,8 +122,8 @@ namespace CynicScript
 	if (idx < 0 || idx >= (uint64_t)(v).size()) \
 		CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Idx out of range."));
 
-#define CHECK_IDX_VALID(idxValue) \
-	if (!CYS_IS_INT_VALUE(idxValue))  \
+#define CHECK_IDX_VALID(idxValue)    \
+	if (!CYS_IS_INT_VALUE(idxValue)) \
 		CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Invalid idx type for array or string,only integer is available."));
 
 		while (1)
@@ -167,12 +167,10 @@ namespace CynicScript
 
 #endif
 
-					uint8_t i = 0;
-					while (i < retCount)
+					for (uint8_t i = 0; i < retCount; ++i)
 					{
 						auto value = *(retValues + i);
 						PUSH_STACK(value);
-						i++;
 					}
 				}
 
@@ -1023,7 +1021,7 @@ namespace CynicScript
 
 				break;
 			}
-			case OP_RESET:
+			case OP_INIT_VAR_ARG:
 			{
 				auto count = READ_INS();
 				std::vector<Value> values(count);

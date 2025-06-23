@@ -71,5 +71,5 @@ class Vec5
 let b=new Vec5();
 
 b.x=10;
-io.println("b.x={}",b.x);
+io.println("b.x={}",b.x); // b.x=10
 b.q=100;//Error Hint:The member:q in the class:Vec5 is a const member,cannot be reassigned.

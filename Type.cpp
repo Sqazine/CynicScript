@@ -19,6 +19,7 @@ namespace CynicScript
         {TEXT("f64"), TypeKind::F64},
         {TEXT("bool"), TypeKind::BOOL},
         {TEXT("char"), TypeKind::CHAR},
+        {TEXT("str"), TypeKind::STR},
         {TEXT("any"), TypeKind::ANY},
     };
 
@@ -27,7 +28,8 @@ namespace CynicScript
     {
     }
 
-    Type::Type(TypeKind kind) noexcept
+    Type::Type(TypeKind kind, const SourceLocation &sourceLocation) noexcept
+        : mSourceLocation(sourceLocation)
     {
         for (const auto &p : gPrimitiveTypeMap)
         {
@@ -42,7 +44,8 @@ namespace CynicScript
         CheckIsValid();
     }
 
-    Type::Type(STRING_VIEW name) noexcept
+    Type::Type(STRING_VIEW name, const SourceLocation &sourceLocation) noexcept
+        : mSourceLocation(sourceLocation)
     {
         for (const auto &p : gPrimitiveTypeMap)
         {
@@ -57,8 +60,8 @@ namespace CynicScript
         CheckIsValid();
     }
 
-    Type::Type(TypeKind kind, STRING_VIEW name) noexcept
-        : mName(name), mKind(kind)
+    Type::Type(TypeKind kind, STRING_VIEW name, const SourceLocation &sourceLocation) noexcept
+        : mName(name), mKind(kind), mSourceLocation(sourceLocation)
     {
     }
 
@@ -101,11 +104,11 @@ namespace CynicScript
     {
         if (mKind == TypeKind::UNDEFINED)
         {
-            CYS_LOG_ERROR(TEXT("Type is undefined, please check your code."));
+            CYS_LOG_ERROR_WITH_LOC(mSourceLocation.pos,TEXT("Type is undefined, please check your code."));
         }
         if (mName.empty())
         {
-            CYS_LOG_ERROR(TEXT("Type name is empty, please check your code."));
+            CYS_LOG_ERROR_WITH_LOC(mSourceLocation.pos,TEXT("Type name is empty, please check your code."));
         }
     }
 }

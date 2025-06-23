@@ -181,7 +181,7 @@ namespace CynicScript
 				CASE_1(OP_STRUCT)
 				CASE_1(OP_APPREGATE_RESOLVE)
 				CASE_1(OP_APPREGATE_RESOLVE_VAR_ARG)
-				CASE_1(OP_RESET)
+				CASE_1(OP_INIT_VAR_ARG)
 			case OP_CONSTANT:
 			{
 				auto tok = opCodeRelatedTokens[opcodes[i + 1]];

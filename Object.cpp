@@ -62,6 +62,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> StrObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle string serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -116,6 +117,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> ArrayObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle array serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -178,6 +180,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> DictObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle dict serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -235,6 +238,7 @@ namespace CynicScript
 	}
 	std::vector<uint8_t> StructObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle struct serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -295,6 +299,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> FunctionObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle function serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -357,6 +362,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> UpValueObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle upvalue serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -405,6 +411,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> ClosureObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle closure serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -434,6 +441,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> NativeFunctionObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle native function serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -459,6 +467,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> RefObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle ref serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -520,6 +529,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> ClassObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle class serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -610,6 +620,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> ClassClosureBindObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle class closure bind serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -670,6 +681,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> EnumObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle enum serialization
 		return std::vector<uint8_t>();
 	}
 
@@ -720,6 +732,7 @@ namespace CynicScript
 
 	std::vector<uint8_t> ModuleObject::Serialize() const
 	{
+		// TODO: Not finished yet, need to handle module serialization
 		return std::vector<uint8_t>();
 	}
 
