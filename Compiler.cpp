@@ -916,10 +916,13 @@ namespace CynicScript
 		CompileExpr(callee->callee, RWState::READ);
 		EmitOpCode(OP_CALL, expr->callee->tagToken);
 		Emit(0);
-		for (const auto &arg : callee->arguments)
-			CompileExpr(arg);
-		EmitOpCode(OP_CALL, expr->callee->tagToken);
-		Emit(static_cast<uint8_t>(callee->arguments.size()));
+		if (!callee->arguments.empty())
+		{
+			for (const auto &arg : callee->arguments)
+				CompileExpr(arg);
+			EmitOpCode(OP_CALL, expr->callee->tagToken);
+			Emit(static_cast<uint8_t>(callee->arguments.size()));
+		}
 	}
 
 	void Compiler::CompileThisExpr(ThisExpr *expr)
