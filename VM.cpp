@@ -5,6 +5,7 @@
 #include "Object.h"
 #include "Token.h"
 #include "Logger.h"
+#include "Config.h"
 namespace CynicScript
 {
 	std::vector<Value> VM::Run(FunctionObject *mainFunc) noexcept
@@ -150,23 +151,25 @@ namespace CynicScript
 
 				if (retCount == 0)
 				{
-#ifdef CYS_FUNCTION_CACHE_OPT
-					auto callFrameTop = PEEK_CALL_FRAME(0);
-					callFrameTop->closure->function->SetCache(callFrameTop->argumentsHash, {Value()});
-#endif
-
+					// ++ Function cache relative
+					if (Config::GetInstance()->IsUseFunctionCache())
+					{
+						auto callFrameTop = PEEK_CALL_FRAME(0);
+						callFrameTop->closure->function->SetCache(callFrameTop->argumentsHash, {Value()});
+					}
+					// -- Function cache relative
 					PUSH_STACK(Value());
 				}
 				else
 				{
-#ifdef CYS_FUNCTION_CACHE_OPT
-
-					auto callFrameTop = PEEK_CALL_FRAME(0);
-					std::vector<Value> rets(retValues, retValues + retCount);
-					callFrameTop->closure->function->SetCache(callFrameTop->argumentsHash, rets);
-
-#endif
-
+					// ++ Function cache relative
+					if (Config::GetInstance()->IsUseFunctionCache())
+					{
+						auto callFrameTop = PEEK_CALL_FRAME(0);
+						std::vector<Value> rets(retValues, retValues + retCount);
+						callFrameTop->closure->function->SetCache(callFrameTop->argumentsHash, rets);
+					}
+					// ++ Function cache relative
 					for (uint8_t i = 0; i < retCount; ++i)
 					{
 						auto value = *(retValues + i);
@@ -627,24 +630,27 @@ namespace CynicScript
 
 					auto argsHash = HashValueList(STACK_TOP() - argCount, STACK_TOP());
 					std::vector<Value> rets;
-#ifdef CYS_FUNCTION_CACHE_OPT
-					if (CYS_TO_CLOSURE_VALUE(callee)->function->GetCache(argsHash, rets))
+					// ++ Function cache relative
+					if (Config::GetInstance()->IsUseFunctionCache() && CYS_TO_CLOSURE_VALUE(callee)->function->GetCache(argsHash, rets))
 					{
 						MOVE_STACK_TOP(-(argCount + 1));
 						for (int32_t i = 0; i < rets.size(); ++i)
 							PUSH_STACK(rets[i]);
 					}
 					else
-#endif
+					// -- Function cache relative
 					{
 						// init a new frame
 						CallFrame newframe;
 						newframe.closure = CYS_TO_CLOSURE_VALUE(callee);
 						newframe.ip = newframe.closure->function->chunk.opCodes.data();
 						newframe.slots = STACK_TOP() - argCount - 1;
-#ifdef CYS_FUNCTION_CACHE_OPT
-						newframe.argumentsHash = argsHash;
-#endif
+						// ++ Function cache relative
+						if (Config::GetInstance()->IsUseFunctionCache())
+						{
+							newframe.argumentsHash = argsHash;
+						}
+						// -- Function cache relative
 						PUSH_CALL_FRAME(newframe);
 					}
 				}

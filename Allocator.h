@@ -4,6 +4,7 @@
 #include "Value.h"
 #include "Utils.h"
 #include "Logger.h"
+#include "Config.h"
 
 namespace CynicScript
 {
@@ -13,9 +14,9 @@ namespace CynicScript
         uint8_t *ip = nullptr;
         Value *slots = nullptr;
 
-#ifdef CYS_FUNCTION_CACHE_OPT
+        // ++ Function cache relative
         size_t argumentsHash;
-#endif
+        // -- Function cache relative
     };
     class CYS_API Allocator
     {
@@ -88,8 +89,9 @@ namespace CynicScript
         T *object = new T(std::forward<Args>(params)...);
         size_t objBytes = sizeof(*object);
         mBytesAllocated += objBytes;
-#ifdef CYS_GC_STRESS
-        GC();
+#ifndef NDEBUG
+        if (Config::GetInstance()->IsStressGC())
+            GC();
 #endif
         if (mBytesAllocated > mNextGCByteSize)
             GC();
@@ -97,8 +99,9 @@ namespace CynicScript
         object->next = mObjectChain;
         object->marked = false;
         mObjectChain = object;
-#ifdef CYS_GC_DEBUG
-        Logger::Info(TEXT("{} has been add to gc record chain {} for {}"), (void *)object, objBytes, object->kind);
+#ifndef NDEBUG
+        if (Config::GetInstance()->IsDebugGC())
+            CYS_LOG_INFO(TEXT("{} has been add to gc record chain {} for {}"), (void *)object, objBytes, object->kind);
 #endif
 
         return object;
@@ -107,8 +110,9 @@ namespace CynicScript
     template <class T>
     inline void Allocator::FreeObject(T *object)
     {
-#ifdef CYS_GC_DEBUG
-        Logger::Info(TEXT("delete object(0x{})"), (void *)object);
+#ifndef NDEBUG
+        if (Config::GetInstance()->IsDebugGC())
+            CYS_LOG_INFO(TEXT("delete object(0x{})"), (void *)object);
 #endif
         mBytesAllocated -= sizeof(object);
         SAFE_DELETE(object);

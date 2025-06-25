@@ -1,5 +1,6 @@
 #include "Allocator.h"
 #include "VM.h"
+
 namespace CynicScript
 {
     SINGLETON_IMPL(Allocator)
@@ -48,8 +49,9 @@ namespace CynicScript
             object = next;
         }
 
-#ifdef CYS_GC_DEBUG
-        Logger::Info(TEXT("collected {} bytes (from {} to {}) next gc bytes {}"), bytes - mBytesAllocated, bytes, mNextGCByteSize);
+#ifndef NDEBUG
+        if (Config::GetInstance()->IsDebugGC())
+            CYS_LOG_INFO(TEXT("collected {} bytes (from {} to {}) next gc bytes {}"), bytes - mBytesAllocated, bytes, mNextGCByteSize);
 #endif
     }
 
@@ -171,9 +173,13 @@ namespace CynicScript
 
     void Allocator::GC()
     {
-#ifdef CYS_GC_DEBUG
-        Logger::Info(TEXT("begin gc"));
-        size_t bytes = mBytesAllocated;
+#ifndef NDEBUG
+        size_t bytes = 0;
+        if (Config::GetInstance()->IsDebugGC())
+        {
+            CYS_LOG_INFO(TEXT("begin gc"));
+            bytes = mBytesAllocated;
+        }
 #endif
 
         MarkRootObjects();
@@ -181,9 +187,12 @@ namespace CynicScript
         Sweep();
         mNextGCByteSize = mBytesAllocated * GC_HEAP_GROW_FACTOR;
 
-#ifdef CYS_GC_DEBUG
-        Logger::Info(TEXT("end gc"));
-        Logger::Info(TEXT("    collected {} bytes (from {} to {}) next gc bytes {}"), bytes - mBytesAllocated, bytes, mNextGCByteSize);
+#ifndef NDEBUG
+        if (Config::GetInstance()->IsDebugGC())
+        {
+           CYS_LOG_INFO(TEXT("end gc"));
+           CYS_LOG_INFO(TEXT("    collected {} bytes (from {} to {}) next gc bytes {}"), bytes - mBytesAllocated, bytes, mNextGCByteSize);
+        }
 #endif
     }
 

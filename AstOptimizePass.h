@@ -198,10 +198,12 @@ namespace CynicScript
             return this;
         }
 
-        void Execute(Stmt *stmt)
+        Stmt* Execute(Stmt *stmt)
         {
+            Stmt* result = stmt;
             for (auto &pass : mPasses)
-                pass->Execute(stmt);
+                pass->Execute(result);
+            return result;
         }
 
     private:

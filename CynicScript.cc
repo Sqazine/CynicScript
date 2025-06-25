@@ -12,17 +12,10 @@
 CynicScript::Lexer *gLexer{nullptr};
 CynicScript::Parser *gParser{nullptr};
 
-CynicScript::AstOptimizePassManager *gAstOptimizePassManager;
+CynicScript::AstOptimizePassManager *gAstOptimizePassManager{nullptr};
 
 CynicScript::Compiler *gCompiler{nullptr};
 CynicScript::VM *gVm{nullptr};
-
-struct Config
-{
-	std::string_view sourceFilePath;
-	bool isSerializeBinaryChunk{false};
-	std::string_view serializeBinaryFilePath;
-} gConfig;
 
 int32_t PrintVersion()
 {
@@ -37,6 +30,11 @@ int32_t PrintUsage()
 	CYS_LOG_INFO(TEXT("-v or --version:show current CynicScript version"));
 	CYS_LOG_INFO(TEXT("-s or --serialize: serialize source file as bytecode binary file"));
 	CYS_LOG_INFO(TEXT("-f or --file:run source file with a valid file path,like : CynicScript -f examples/array.cd."));
+	CYS_LOG_INFO(TEXT("--function-cache:use function cache optimize."));
+#ifndef NDEBUG
+	CYS_LOG_INFO(TEXT("--gc-debug:debug gc."));
+	CYS_LOG_INFO(TEXT("--gc-stress:stressing gc."));
+#endif
 	CYS_LOG_INFO(TEXT("In REPL mode, you can input '{}' to clear the REPL history, and '{}' to exit the REPL."), CYS_REPL_CLEAR, CYS_REPL_EXIT);
 	return EXIT_FAILURE;
 }
@@ -50,11 +48,16 @@ void Run(STRING_VIEW content)
 #endif
 	auto stmt = gParser->Parse(tokens);
 
-	gAstOptimizePassManager->Execute(stmt);
+#ifndef NDEBUG
+	CynicScript::Logger::Println(TEXT("{}"), stmt->ToString());
+#endif
+
+	stmt = gAstOptimizePassManager->Execute(stmt);
 
 #ifndef NDEBUG
 	CynicScript::Logger::Println(TEXT("{}"), stmt->ToString());
 #endif
+
 	auto mainFunc = gCompiler->Compile(stmt);
 
 #ifndef NDEBUG
@@ -62,10 +65,10 @@ void Run(STRING_VIEW content)
 	CynicScript::Logger::Println(TEXT("{}"), str);
 #endif
 
-	if (gConfig.isSerializeBinaryChunk)
+	if (CynicScript::Config::GetInstance()->IsSerializeBinaryChunk())
 	{
 		auto data = mainFunc->chunk.Serialize();
-		CynicScript::WriteBinaryFile(gConfig.serializeBinaryFilePath, data);
+		CynicScript::WriteBinaryFile(CynicScript::Config::GetInstance()->GetSerializeBinaryFilePath(), data);
 	}
 	else
 	{
@@ -115,7 +118,7 @@ int32_t ParseArgs(int32_t argc, const char *argv[])
 		if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--file") == 0)
 		{
 			if (i + 1 < argc)
-				gConfig.sourceFilePath = argv[++i];
+				CynicScript::Config::GetInstance()->SetExecuteFilePath(argv[++i]);
 			else
 				return PrintUsage();
 		}
@@ -124,12 +127,14 @@ int32_t ParseArgs(int32_t argc, const char *argv[])
 		{
 			if (i + 1 < argc)
 			{
-				gConfig.isSerializeBinaryChunk = true;
-				gConfig.serializeBinaryFilePath = argv[++i];
+				CynicScript::Config::GetInstance()->SetSerializeBinaryChunk(true);
+				CynicScript::Config::GetInstance()->SetSerializeBinaryFilePath(argv[++i]);
 			}
 			else
 				return PrintUsage();
 		}
+		if (strcmp(argv[i], "--function-cache") == 0)
+			CynicScript::Config::GetInstance()->SetUseFunctionCache(true);
 
 		if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
 			return PrintUsage();
@@ -160,8 +165,8 @@ int32_t main(int32_t argc, const char *argv[])
 		->Add<CynicScript::SyntaxCheckPass>()
 		->Add<CynicScript::TypeCheckAndResolvePass>();
 
-	if (!gConfig.sourceFilePath.empty())
-		RunFile(gConfig.sourceFilePath);
+	if (!CynicScript::Config::GetInstance()->GetExecuteFilePath().empty())
+		RunFile(CynicScript::Config::GetInstance()->GetExecuteFilePath());
 	else
 		Repl();
 

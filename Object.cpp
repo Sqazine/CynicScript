@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Logger.h"
 #include "Allocator.h"
+#include "Config.h"
 namespace CynicScript
 {
 
@@ -18,8 +19,9 @@ namespace CynicScript
 	{
 		if (marked)
 			return;
-#ifdef CYS_GC_DEBUG
-		Logger::Info(TEXT("(0x{}) mark: {}"), (void *)this, ToString());
+#ifndef NDEBUG
+		if (Config::GetInstance()->IsDebugGC())
+			CYS_LOG_INFO(TEXT("(0x{}) mark: {}"), (void *)this, ToString());
 #endif
 		marked = true;
 		Allocator::GetInstance()->mGrayObjects.emplace_back(this);
@@ -28,16 +30,18 @@ namespace CynicScript
 	{
 		if (!marked)
 			return;
-#ifdef CYS_GC_DEBUG
-		Logger::Info(TEXT("(0x{}) unMark: {}"), (void *)this, ToString());
+#ifndef NDEBUG
+		if (Config::GetInstance()->IsDebugGC())
+			CYS_LOG_INFO(TEXT("(0x{}) unMark: {}"), (void *)this, ToString());
 #endif
 		marked = false;
 	}
 
 	void Object::Blacken()
 	{
-#ifdef CYS_GC_DEBUG
-		Logger::Info(TEXT("(0x{}) blacken: {}"), (void *)this, ToString());
+#ifndef NDEBUG
+		if (Config::GetInstance()->IsDebugGC())
+			CYS_LOG_INFO(TEXT("(0x{}) blacken: {}"), (void *)this, ToString());
 #endif
 	}
 
@@ -271,13 +275,16 @@ namespace CynicScript
 		for (auto &c : chunk.constants)
 			c.Mark();
 
-#ifdef CYS_FUNCTION_CACHE_OPT
-		for (auto &[key, value] : caches)
+		// ++ Function cache relative
+		if (Config::GetInstance()->IsUseFunctionCache())
 		{
-			for (auto &valueElement : value)
-				valueElement.Mark();
+			for (auto &[key, value] : caches)
+			{
+				for (auto &valueElement : value)
+					valueElement.Mark();
+			}
 		}
-#endif
+		// -- Function cache relative
 	}
 
 	bool FunctionObject::IsEqualTo(Object *other)
@@ -303,7 +310,7 @@ namespace CynicScript
 		return std::vector<uint8_t>();
 	}
 
-#ifdef CYS_FUNCTION_CACHE_OPT
+	// ++ Function cache relative
 	void FunctionObject::SetCache(size_t hash, const std::vector<Value> &result)
 	{
 		caches[hash] = result;
@@ -319,7 +326,7 @@ namespace CynicScript
 
 		return false;
 	}
-#endif
+	// -- Function cache relative
 
 	UpValueObject::UpValueObject()
 		: Object(ObjectKind::UPVALUE), location(nullptr), nextUpValue(nullptr)

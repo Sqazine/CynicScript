@@ -179,13 +179,11 @@ namespace CynicScript
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
 
-#ifdef CYS_FUNCTION_CACHE_OPT
+        // ++ Function cache relative
         void SetCache(size_t hash, const std::vector<Value> &result);
         bool GetCache(size_t hash, std::vector<Value> &result) const;
-        void PrintCache();
-
         std::unordered_map<size_t, std::vector<Value>> caches;
-#endif
+        // -- Function cache relative
 
         uint8_t arity{0};
         VarArg varArg{VarArg::NONE};
