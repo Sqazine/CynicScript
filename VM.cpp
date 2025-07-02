@@ -698,17 +698,17 @@ namespace CynicScript
 			case OP_CLASS:
 			{
 				auto name = PEEK_STACK(0);
-				auto ctorCount = READ_INS();
+				auto constructorCount = READ_INS();
+				auto parentClassCount = READ_INS();
 				auto varCount = READ_INS();
 				auto constCount = READ_INS();
-				auto parentClassCount = READ_INS();
 
 				auto classObj = Allocator::GetInstance()->CreateObject<ClassObject>();
 
 				classObj->name = CYS_TO_STR_VALUE(name)->value;
 				POP_STACK(); // pop name strobject
 
-				for (int32_t i = 0; i < ctorCount; ++i)
+				for (int32_t i = 0; i < constructorCount; ++i)
 				{
 					auto v = CYS_TO_CLOSURE_VALUE(POP_STACK());
 					classObj->constructors[v->function->arity] = v;

@@ -1371,9 +1371,9 @@ namespace CynicScript
 		EmitConstant(new StrObject(decl->name), decl->tagToken);
 		EmitOpCode(OP_CLASS, decl->tagToken);
 		Emit(constructorCount);
+		Emit(static_cast<uint8_t>(decl->parents.size()));
 		Emit(varCount);
 		Emit(constCount);
-		Emit(static_cast<uint8_t>(decl->parents.size()));
 
 		EmitReturn(1, decl->tagToken);
 

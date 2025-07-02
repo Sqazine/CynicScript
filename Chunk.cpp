@@ -91,42 +91,42 @@ namespace CynicScript
 
 	STRING Chunk::OpCodeToString(const OpCodeList &opcodes) const
 	{
-#define CASE(opCode)                                                                                                 \
-	case opCode:                                                                                                     \
-	{                                                                                                                \
-		auto tok = opCodeRelatedTokens[opcodes[i + 1]];                                                              \
-		auto tokStr = tok->ToString();                                                                               \
-		STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));                                                 \
-		tokStr += tokGap;                                                                                            \
-		stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\t") << TEXT(#opCode) << std::endl; \
-		i += 1;                                                                                                      \
-		break;                                                                                                       \
+#define CASE(opCode)                                                                                                          \
+	case opCode:                                                                                                              \
+	{                                                                                                                         \
+		auto instrLoc = i;                                                                                                    \
+		auto tok = opCodeRelatedTokens[opcodes[++i]];                                                                         \
+		auto tokStr = tok->ToString();                                                                                        \
+		STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));                                                          \
+		tokStr += tokGap;                                                                                                     \
+		stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << instrLoc << TEXT("\t") << TEXT(#opCode) << std::endl; \
+		break;                                                                                                                \
 	}
 
-#define CASE_JUMP(opCode, op)                                                                                                                                             \
-	case opCode:                                                                                                                                                          \
-	{                                                                                                                                                                     \
-		auto tok = opCodeRelatedTokens[opcodes[i + 1]];                                                                                                                   \
-		uint16_t addressOffset = opcodes[i + 2] << 8 | opcodes[i + 3];                                                                                                    \
-		auto tokStr = tok->ToString();                                                                                                                                    \
-		STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));                                                                                                      \
-		tokStr += tokGap;                                                                                                                                                 \
-		stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\t") << TEXT(#opCode) << TEXT("\t") << i << "->" << i op addressOffset + 3 << std::endl; \
-		i += 3;                                                                                                                                                           \
-		break;                                                                                                                                                            \
+#define CASE_JUMP(opCode, op)                                                                                                                                                      \
+	case opCode:                                                                                                                                                                   \
+	{                                                                                                                                                                              \
+		auto instrLoc = i;                                                                                                                                                         \
+		auto tok = opCodeRelatedTokens[opcodes[++i]];                                                                                                                              \
+		uint16_t addressOffset = opcodes[++i] << 8 | opcodes[++i];                                                                                                                 \
+		auto tokStr = tok->ToString();                                                                                                                                             \
+		STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));                                                                                                               \
+		tokStr += tokGap;                                                                                                                                                          \
+		stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << instrLoc << TEXT("\t") << TEXT(#opCode) << TEXT("\t") << i << "->" << i op addressOffset + 3 << std::endl; \
+		break;                                                                                                                                                                     \
 	}
 
-#define CASE_1(opCode)                                                                                                                    \
-	case opCode:                                                                                                                          \
-	{                                                                                                                                     \
-		auto tok = opCodeRelatedTokens[opcodes[i + 1]];                                                                                   \
-		auto pos = opcodes[i + 2];                                                                                                        \
-		auto tokStr = tok->ToString();                                                                                                    \
-		STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));                                                                      \
-		tokStr += tokGap;                                                                                                                 \
-		stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\t") << TEXT(#opCode) << TEXT("\t") << pos << std::endl; \
-		i += 2;                                                                                                                           \
-		break;                                                                                                                            \
+#define CASE_1(opCode)                                                                                                                             \
+	case opCode:                                                                                                                                   \
+	{                                                                                                                                              \
+		auto instrLoc = i;                                                                                                                         \
+		auto tok = opCodeRelatedTokens[opcodes[++i]];                                                                                              \
+		auto pos = opcodes[++i];                                                                                                                   \
+		auto tokStr = tok->ToString();                                                                                                             \
+		STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));                                                                               \
+		tokStr += tokGap;                                                                                                                          \
+		stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << instrLoc << TEXT("\t") << TEXT(#opCode) << TEXT("\t") << pos << std::endl; \
+		break;                                                                                                                                     \
 	}
 
 		const uint32_t maxTokenShowSize = GetBiggestTokenLength() + 4; // 4 for a gap "    "
@@ -184,35 +184,36 @@ namespace CynicScript
 				CASE_1(OP_INIT_VAR_ARG)
 			case OP_CONSTANT:
 			{
-				auto tok = opCodeRelatedTokens[opcodes[i + 1]];
-				auto pos = opcodes[i + 2];
+				auto instrLoc = i;
+				auto tok = opCodeRelatedTokens[opcodes[++i]];
+				auto pos = opcodes[++i];
 				STRING constantStr = constants[pos].ToString();
 
 				auto tokStr = tok->ToString();
 				STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));
 				tokStr += tokGap;
-				stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\tOP_CONSTANT\t") << pos << TEXT("\t'") << constantStr << TEXT("'") << std::endl;
-				i += 2;
+				stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << instrLoc << TEXT("\tOP_CONSTANT\t") << pos << TEXT("\t'") << constantStr << TEXT("'") << std::endl;
 				break;
 			}
 			case OP_CLASS:
 			{
-				auto tok = opCodeRelatedTokens[opcodes[i + 1]];
-				auto ctorCount = opcodes[i + 2];
-				auto varCount = opcodes[i + 3];
-				auto constCount = opcodes[i + 4];
-				auto parentClassCount = opcodes[i + 5];
+				auto instrLoc = i;
+				auto tok = opCodeRelatedTokens[opcodes[++i]];
+				auto constructorCount = opcodes[++i];
+				auto parentClassCount = opcodes[++i];
+				auto varCount = opcodes[++i];
+				auto constCount = opcodes[++i];
 				auto tokStr = tok->ToString();
 				STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));
 				tokStr += tokGap;
-				stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\tOP_CLASS\t") << ctorCount << TEXT("\t") << varCount << TEXT("\t") << constCount << TEXT("\t") << parentClassCount << std::endl;
-				i += 5;
+				stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\tOP_CLASS\t") << constructorCount << TEXT("\t") << parentClassCount << TEXT("\t") << varCount << TEXT("\t") << constCount << TEXT("\t") << std::endl;
 				break;
 			}
 			case OP_CLOSURE:
 			{
-				auto tok = opCodeRelatedTokens[opcodes[i + 1]];
-				auto pos = opcodes[i + 2];
+				auto instrLoc = i;
+				auto tok = opCodeRelatedTokens[opcodes[++i]];
+				auto pos = opcodes[++i];
 				STRING funcStr = (TEXT("<fn ") + CYS_TO_FUNCTION_VALUE(constants[pos])->name + TEXT(":0x") + PointerAddressToString((void *)CYS_TO_FUNCTION_VALUE(constants[pos])) + TEXT(">"));
 
 				auto tokStr = tok->ToString();
@@ -232,19 +233,18 @@ namespace CynicScript
 						stream << TEXT("depth  ") << opcodes[++i] << std::endl;
 					}
 				}
-				i += 2;
 				break;
 			}
 			case OP_MODULE:
 			{
-				auto tok = opCodeRelatedTokens[opcodes[i + 1]];
-				auto varCount = opcodes[i + 2];
-				auto constCount = opcodes[i + 3];
+				auto instrLoc = i;
+				auto tok = opCodeRelatedTokens[opcodes[++i]];
+				auto varCount = opcodes[++i];
+				auto constCount = opcodes[++i];
 				auto tokStr = tok->ToString();
 				STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));
 				tokStr += tokGap;
 				stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\tOP_MODULE\t") << varCount << TEXT("\t") << constCount << std::endl;
-				i += 3;
 				break;
 			}
 			default:
