@@ -94,7 +94,7 @@ namespace CynicScript
     struct CYS_API Object
     {
         Object(ObjectKind kind);
-        virtual ~Object();
+        virtual ~Object() = default;
 
         virtual STRING ToString() const = 0;
         void Mark();
@@ -111,7 +111,7 @@ namespace CynicScript
     struct CYS_API StrObject : public Object
     {
         StrObject(STRING_VIEW value);
-        ~StrObject() override;
+        ~StrObject() override = default;
 
         STRING ToString() const override;
         bool IsEqualTo(Object *other) override;
@@ -124,7 +124,7 @@ namespace CynicScript
     {
         ArrayObject();
         ArrayObject(const std::vector<struct Value> &elements);
-        ~ArrayObject() override;
+        ~ArrayObject() override = default;
 
         STRING ToString() const override;
         void Blacken() override;
@@ -138,7 +138,7 @@ namespace CynicScript
     {
         DictObject();
         DictObject(const ValueUnorderedMap &elements);
-        ~DictObject() override;
+        ~DictObject() override = default;
 
         STRING ToString() const override;
 
@@ -153,7 +153,7 @@ namespace CynicScript
     {
         StructObject();
         StructObject(const std::unordered_map<STRING, Value> &elements);
-        ~StructObject() override;
+        ~StructObject() override = default;
 
         STRING ToString() const override;
 
@@ -168,7 +168,7 @@ namespace CynicScript
     {
         FunctionObject();
         FunctionObject(STRING_VIEW name);
-        ~FunctionObject() override;
+        ~FunctionObject() override = default;
 
         STRING ToString() const override;
 #ifndef NDEBUG
@@ -196,7 +196,7 @@ namespace CynicScript
     {
         UpValueObject();
         UpValueObject(Value *location);
-        ~UpValueObject() override;
+        ~UpValueObject() override = default;
 
         STRING ToString() const override;
 
@@ -213,7 +213,7 @@ namespace CynicScript
     {
         ClosureObject();
         ClosureObject(FunctionObject *function);
-        ~ClosureObject() override;
+        ~ClosureObject() override = default;
 
         STRING ToString() const override;
 
@@ -231,7 +231,7 @@ namespace CynicScript
     {
         NativeFunctionObject();
         NativeFunctionObject(NativeFunction f);
-        ~NativeFunctionObject() override;
+        ~NativeFunctionObject() override = default;
 
         STRING ToString() const override;
 
@@ -244,7 +244,7 @@ namespace CynicScript
     struct CYS_API RefObject : public Object
     {
         RefObject(Value *pointer);
-        ~RefObject() override;
+        ~RefObject() override = default;
 
         STRING ToString() const override;
 
@@ -258,7 +258,7 @@ namespace CynicScript
     {
         ClassObject();
         ClassObject(STRING_VIEW name);
-        ~ClassObject() override;
+        ~ClassObject() override = default;
 
         STRING ToString() const override;
 
@@ -279,7 +279,7 @@ namespace CynicScript
     {
         ClassClosureBindObject();
         ClassClosureBindObject(const Value &receiver, ClosureObject *cl);
-        ~ClassClosureBindObject() override;
+        ~ClassClosureBindObject() override = default;
 
         STRING ToString() const override;
 
@@ -295,7 +295,7 @@ namespace CynicScript
     {
         EnumObject();
         EnumObject(const STRING &name, const std::unordered_map<STRING, Value> &pairs);
-        ~EnumObject() override;
+        ~EnumObject() override = default;
 
         STRING ToString() const override;
 
@@ -313,7 +313,7 @@ namespace CynicScript
     {
         ModuleObject();
         ModuleObject(const STRING &name, const std::unordered_map<STRING, Value> &values);
-        ~ModuleObject() override;
+        ~ModuleObject() override = default;
 
         STRING ToString() const override;
 

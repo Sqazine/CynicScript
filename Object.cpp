@@ -11,9 +11,6 @@ namespace CynicScript
 		: kind(kind), marked(false), next(nullptr)
 	{
 	}
-	Object::~Object()
-	{
-	}
 
 	void Object::Mark()
 	{
@@ -49,9 +46,6 @@ namespace CynicScript
 		: Object(ObjectKind::STR), value(value)
 	{
 	}
-	StrObject::~StrObject()
-	{
-	}
 	STRING StrObject::ToString() const
 	{
 		return value;
@@ -76,9 +70,6 @@ namespace CynicScript
 	}
 	ArrayObject::ArrayObject(const std::vector<Value> &elements)
 		: Object(ObjectKind::ARRAY), elements(elements)
-	{
-	}
-	ArrayObject::~ArrayObject()
 	{
 	}
 
@@ -131,9 +122,6 @@ namespace CynicScript
 	}
 	DictObject::DictObject(const ValueUnorderedMap &elements)
 		: Object(ObjectKind::DICT), elements(elements)
-	{
-	}
-	DictObject::~DictObject()
 	{
 	}
 
@@ -196,9 +184,6 @@ namespace CynicScript
 		: Object(ObjectKind::STRUCT), elements(elements)
 	{
 	}
-	StructObject::~StructObject()
-	{
-	}
 
 	STRING StructObject::ToString() const
 	{
@@ -252,9 +237,6 @@ namespace CynicScript
 	}
 	FunctionObject::FunctionObject(STRING_VIEW name)
 		: Object(ObjectKind::FUNCTION), arity(0), upValueCount(0), name(name), varArg(VarArg::NONE)
-	{
-	}
-	FunctionObject::~FunctionObject()
 	{
 	}
 
@@ -336,9 +318,6 @@ namespace CynicScript
 		: Object(ObjectKind::UPVALUE), location(location), nextUpValue(nullptr)
 	{
 	}
-	UpValueObject::~UpValueObject()
-	{
-	}
 
 	STRING UpValueObject::ToString() const
 	{
@@ -381,9 +360,6 @@ namespace CynicScript
 		: Object(ObjectKind::CLOSURE), function(function)
 	{
 		upvalues.resize(function->upValueCount);
-	}
-	ClosureObject::~ClosureObject()
-	{
 	}
 
 	STRING ClosureObject::ToString() const
@@ -430,9 +406,6 @@ namespace CynicScript
 		: Object(ObjectKind::NATIVE_FUNCTION), fn(f)
 	{
 	}
-	NativeFunctionObject::~NativeFunctionObject()
-	{
-	}
 
 	STRING NativeFunctionObject::ToString() const
 	{
@@ -454,9 +427,6 @@ namespace CynicScript
 
 	RefObject::RefObject(Value *pointer)
 		: Object(ObjectKind::REF), pointer(pointer)
-	{
-	}
-	RefObject::~RefObject()
 	{
 	}
 
@@ -485,10 +455,6 @@ namespace CynicScript
 
 	ClassObject::ClassObject(STRING_VIEW name)
 		: Object(ObjectKind::CLASS), name(name)
-	{
-	}
-
-	ClassObject::~ClassObject()
 	{
 	}
 
@@ -598,9 +564,6 @@ namespace CynicScript
 		: Object(ObjectKind::CLASS_CLOSURE_BIND), receiver(receiver), closure(cl)
 	{
 	}
-	ClassClosureBindObject::~ClassClosureBindObject()
-	{
-	}
 	STRING ClassClosureBindObject::ToString() const
 	{
 		return closure->ToString();
@@ -637,10 +600,6 @@ namespace CynicScript
 	}
 	EnumObject::EnumObject(const STRING &name, const std::unordered_map<STRING, Value> &pairs)
 		: Object(ObjectKind::ENUM), name(name), pairs(pairs)
-	{
-	}
-
-	EnumObject::~EnumObject()
 	{
 	}
 
@@ -699,10 +658,6 @@ namespace CynicScript
 
 	ModuleObject::ModuleObject(const STRING &name, const std::unordered_map<STRING, Value> &values)
 		: Object(ObjectKind::MODULE), name(name), values(values)
-	{
-	}
-
-	ModuleObject::~ModuleObject()
 	{
 	}
 
