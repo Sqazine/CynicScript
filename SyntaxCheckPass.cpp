@@ -1,5 +1,5 @@
 #include "SyntaxCheckPass.h"
-#include "Utils.h"
+#include "Common.h"
 #include "Logger.h"
 
 namespace CynicScript

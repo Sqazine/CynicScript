@@ -1,11 +1,25 @@
-#include "Utils.h"
-#include "Logger.h"
+#include "Common.h"
+#include <filesystem>
 #include <locale>
 #include <codecvt>
 #include <fstream>
 #include <sstream>
+#include "Allocator.h"
+#include "LibraryManager.h"
+
 namespace CynicScript
 {
+    void Init()
+    {
+        Allocator::GetInstance()->Init();
+        LibraryManager::GetInstance()->Init();
+    }
+    void Destroy()
+    {
+        LibraryManager::GetInstance()->Destroy();
+        Allocator::GetInstance()->Destroy();
+    }
+
     STRING ReadFile(std::string_view path)
     {
 #ifdef CYS_UTF8_ENCODE
@@ -100,6 +114,17 @@ namespace CynicScript
         return idx;
     }
 
+        uint32_t HashString(CHAR_T* str)
+        {
+            uint32_t hash = 2166136261u;
+    for (size_t i = 0; i < STRLEN(str); i++)
+    {
+        hash ^= (uint8_t)str[i];
+        hash *= 16777619;
+    }
+    return hash;
+        }
+
     namespace Utf8
     {
 
@@ -156,5 +181,70 @@ namespace CynicScript
                 v |= ((uint32_t)(data[start + i] & 0x000000FF) << ((3 - i) * 8));
             return v;
         }
+    }
+
+    void Config::SetExecuteFilePath(std::string_view path)
+    {
+        mExecuteFilePath = path;
+    }
+
+    const std::string &Config::GetExecuteFilePath() const
+    {
+        return mExecuteFilePath;
+    }
+
+    void Config::SetUseFunctionCache(bool toggle)
+    {
+        mUseFunctionCache = toggle;
+    }
+
+    bool Config::IsUseFunctionCache() const
+    {
+        return mUseFunctionCache;
+    }
+
+    void Config::SetSerializeBinaryChunk(bool toggle)
+    {
+        mIsSerializeBinaryChunk = toggle;
+    }
+
+    bool Config::IsSerializeBinaryChunk() const
+    {
+        return mIsSerializeBinaryChunk;
+    }
+
+    void Config::SetSerializeBinaryFilePath(std::string_view path)
+    {
+        mSerializeBinaryFilePath = path;
+    }
+
+    std::string_view Config::GetSerializeBinaryFilePath() const
+    {
+        return mSerializeBinaryFilePath;
+    }
+
+    std::string Config::ToFullPath(std::string_view filePath)
+    {
+        std::filesystem::path filesysPath = filePath;
+        std::string fullPath = filesysPath.string();
+        if (!filesysPath.is_absolute())
+            fullPath = mExecuteFilePath + fullPath;
+        return fullPath;
+    }
+    void Config::SetDebugGC(bool toggle)
+    {
+        mDebugGC = toggle;
+    }
+    bool Config::IsDebugGC() const
+    {
+        return mDebugGC;
+    }
+    void Config::SetStressGC(bool toggle)
+    {
+        mStressGC = toggle;
+    }
+    bool Config::IsStressGC() const
+    {
+        return mStressGC;
     }
 }

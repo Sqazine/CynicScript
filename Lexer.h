@@ -5,7 +5,7 @@
 #include <iostream>
 #include <unordered_map>
 #include "Token.h"
-#include "Utils.h"
+#include "Common.h"
 
 namespace CynicScript
 {

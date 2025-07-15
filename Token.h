@@ -3,7 +3,7 @@
 #include <string>
 #include <string_view>
 #include <ostream>
-#include "Utils.h"
+#include "Common.h"
 namespace CynicScript
 {
 	enum class TokenKind

@@ -6,7 +6,7 @@
 #include <cassert>
 #include <cstdarg>
 #include "Token.h"
-#include "Utils.h"
+#include "Common.h"
 
 namespace CynicScript
 {
@@ -20,7 +20,7 @@ namespace CynicScript
         };
         namespace Record
         {
-            inline STRING mCurFilePath = TEXT("interpreter");
+            inline STRING mCurFilePath = TEXT("repl");
             inline STRING mSourceCode = TEXT("");
         }
 

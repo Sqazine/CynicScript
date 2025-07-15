@@ -5,7 +5,7 @@
 #include <memory>
 #include "Type.h"
 #include "Token.h"
-#include "Utils.h"
+#include "Common.h"
 namespace CynicScript
 {
 	enum class AstKind

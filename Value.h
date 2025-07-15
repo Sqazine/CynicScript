@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-#include "Utils.h"
+#include "Common.h"
 namespace CynicScript
 {
 	enum ValueKind : uint8_t

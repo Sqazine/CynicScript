@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <sstream>
 #include "Version.h"
-#include "Utils.h"
+#include "Common.h"
 #include "Object.h"
 #include "Logger.h"
 namespace CynicScript

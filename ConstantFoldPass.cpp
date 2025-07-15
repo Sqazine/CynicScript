@@ -1,5 +1,5 @@
 #include "ConstantFoldPass.h"
-#include "Utils.h"
+#include "Common.h"
 
 namespace CynicScript
 {

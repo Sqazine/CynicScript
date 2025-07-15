@@ -2,9 +2,8 @@
 #include <vector>
 #include "Object.h"
 #include "Value.h"
-#include "Utils.h"
+#include "Common.h"
 #include "Logger.h"
-#include "Config.h"
 
 namespace CynicScript
 {
@@ -18,12 +17,14 @@ namespace CynicScript
         size_t argumentsHash;
         // -- Function cache relative
     };
-    class CYS_API Allocator
+    class CYS_API Allocator : public Singleton<Allocator>
     {
     public:
-        SINGLETON_DECL(Allocator)
+        void Init() override;
+        void Destroy() override;
 
-        void ResetStatus();
+        void ResetStackPointer();
+        void ResetCallFramePointer();
 
         template <class T, typename... Args>
         T *CreateObject(Args &&...params);
@@ -53,9 +54,14 @@ namespace CynicScript
         void SetGlobalVariable(size_t idx, const Value &v);
 
     private:
-        Allocator();
-        ~Allocator();
+        friend class VM;
+        friend class Compiler;
+        friend class LibraryManager;
+        void StopGC();
+        void RecoverGC();
+        bool m_IsStopGC{false};
 
+    private:
         template <class T>
         void FreeObject(T *object);
         void FreeObjects();

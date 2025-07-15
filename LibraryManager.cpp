@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <ctime>
 #include <iostream>
-#include "Utils.h"
+#include "Common.h"
 #include "Logger.h"
+#include "Allocator.h"
 
 #define PRINT_LAMBDA(fn) [](Value *args, uint32_t argCount, const Token *relatedToken, Value &result) -> bool \
 {                                                                                                             \
@@ -61,8 +62,6 @@
 
 namespace CynicScript
 {
-    SINGLETON_IMPL(LibraryManager)
-
     void LibraryManager::RegisterLibrary(ClassObject *libraryClass)
     {
         for (const auto &lib : mLibraries)
@@ -79,7 +78,7 @@ namespace CynicScript
         return mLibraries;
     }
 
-    LibraryManager::LibraryManager()
+    void LibraryManager::Init()
     {
         const auto SizeOfFunction = new NativeFunctionObject([](Value *args, uint32_t argCount, const Token *relatedToken, Value &result) -> bool
                                                              {
@@ -248,5 +247,10 @@ namespace CynicScript
         mLibraries.emplace_back(dsClass);
         mLibraries.emplace_back(memClass);
         mLibraries.emplace_back(timeClass);
+    }
+
+    void LibraryManager::Destroy()
+    {
+        mLibraries.clear();
     }
 }

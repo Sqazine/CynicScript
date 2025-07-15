@@ -8,7 +8,6 @@ namespace CynicScript
 {
     class CYS_API VM
     {
-        NON_COPYABLE(VM)
     public:
         constexpr VM() noexcept = default;
         constexpr ~VM() noexcept = default;

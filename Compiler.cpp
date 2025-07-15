@@ -1,8 +1,9 @@
 #include "Compiler.h"
-#include "Utils.h"
+#include "Common.h"
 #include "Object.h"
 #include "LibraryManager.h"
 #include "Logger.h"
+#include "Allocator.h"
 namespace CynicScript
 {
 	enum class SymbolLocation
@@ -122,6 +123,7 @@ namespace CynicScript
 			}
 
 			CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("No symbol: \"{}\" in current scope."), name);
+			return Symbol(); // Return an empty symbol, this should never be reached
 		}
 
 		std::array<Symbol, UINT8_COUNT> mSymbols;
@@ -157,7 +159,6 @@ namespace CynicScript
 	Compiler::Compiler()
 		: mSymbolTable(nullptr)
 	{
-		ResetStatus();
 	}
 
 	Compiler::~Compiler()
@@ -202,7 +203,7 @@ namespace CynicScript
 		symbol->name = MAIN_ENTRY_FUNCTION_NAME;
 
 		for (const auto &lib : LibraryManager::GetInstance()->GetLibraries())
-			mSymbolTable->Define(new Token(), Permission::IMMUTABLE, lib->name);
+			mSymbolTable->Define(nullptr, Permission::IMMUTABLE, lib->name);
 	}
 
 	void Compiler::CompileDecl(Decl *decl)

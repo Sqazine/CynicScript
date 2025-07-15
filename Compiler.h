@@ -2,12 +2,12 @@
 #include "Chunk.h"
 #include "Ast.h"
 #include "Object.h"
-#include "Utils.h"
+#include "Common.h"
 namespace CynicScript
 {
 	struct Symbol;
 	class SymbolTable;
-	class CYS_API Compiler
+	class CYS_API Compiler:public NonCopyable
 	{
 	public:
 		Compiler();

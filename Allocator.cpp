@@ -3,20 +3,7 @@
 
 namespace CynicScript
 {
-    SINGLETON_IMPL(Allocator)
-
-    Allocator::Allocator()
-        : mObjectChain(nullptr)
-    {
-        ResetStatus();
-    }
-
-    Allocator::~Allocator()
-    {
-        FreeObjects();
-    }
-
-    void Allocator::ResetStatus()
+    void Allocator::Init()
     {
         if (mObjectChain)
             FreeObjects();
@@ -31,9 +18,20 @@ namespace CynicScript
         mOpenUpValues = nullptr;
 
         memset(mGlobalVariableList, 0, sizeof(Value) * GLOBAL_VARIABLE_MAX);
+    }
 
-        for (int32_t i = 0; i < LibraryManager::GetInstance()->GetLibraries().size(); ++i)
-            mGlobalVariableList[i] = LibraryManager::GetInstance()->GetLibraries()[i];
+    void Allocator::Destroy()
+    {
+        FreeObjects();
+    }
+
+    void Allocator::ResetStackPointer()
+    {
+        mStackTop = mValueStack;
+    }
+    void Allocator::ResetCallFramePointer()
+    {
+        mCallFrameTop = mCallFrameStack;
     }
 
     void Allocator::FreeObjects()
@@ -171,6 +169,16 @@ namespace CynicScript
         mGlobalVariableList[idx] = v;
     }
 
+    void Allocator::StopGC()
+    {
+        m_IsStopGC = true;
+    }
+
+    void Allocator::RecoverGC()
+    {
+        m_IsStopGC = false;
+    }
+
     void Allocator::GC()
     {
 #ifndef NDEBUG
@@ -190,8 +198,8 @@ namespace CynicScript
 #ifndef NDEBUG
         if (Config::GetInstance()->IsDebugGC())
         {
-           CYS_LOG_INFO(TEXT("end gc"));
-           CYS_LOG_INFO(TEXT("    collected {} bytes (from {} to {}) next gc bytes {}"), bytes - mBytesAllocated, bytes, mNextGCByteSize);
+            CYS_LOG_INFO(TEXT("end gc"));
+            CYS_LOG_INFO(TEXT("    collected {} bytes (from {} to {}) next gc bytes {}"), bytes - mBytesAllocated, bytes, mNextGCByteSize);
         }
 #endif
     }

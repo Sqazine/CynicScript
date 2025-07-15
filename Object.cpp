@@ -1,9 +1,8 @@
 #include "Object.h"
 #include "Chunk.h"
-#include "Utils.h"
+#include "Common.h"
 #include "Logger.h"
 #include "Allocator.h"
-#include "Config.h"
 namespace CynicScript
 {
 

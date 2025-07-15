@@ -1,18 +1,21 @@
 #include "VM.h"
 #include <iostream>
 #include "Allocator.h"
-#include "Utils.h"
+#include "Common.h"
 #include "Object.h"
 #include "Token.h"
 #include "Logger.h"
-#include "Config.h"
+
 namespace CynicScript
 {
 	std::vector<Value> VM::Run(FunctionObject *mainFunc) noexcept
 	{
-		PUSH_STACK(mainFunc);
+		Allocator::GetInstance()->StopGC();
 		auto closure = Allocator::GetInstance()->CreateObject<ClosureObject>(mainFunc);
-		POP_STACK();
+		Allocator::GetInstance()->RecoverGC();
+
+		Allocator::GetInstance()->ResetStackPointer();
+		Allocator::GetInstance()->ResetCallFramePointer();
 
 		PUSH_STACK(closure);
 

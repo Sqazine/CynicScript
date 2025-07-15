@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include "Token.h"
 #include "Ast.h"
-#include "Utils.h"
+#include "Common.h"
 #include "Type.h"
 namespace CynicScript
 {
@@ -48,9 +48,8 @@ namespace CynicScript
 	typedef Expr *(Parser::*InfixFn)(Expr *);
 	typedef Expr *(Parser::*PostfixFn)(Expr *);
 
-	class CYS_API Parser
+	class CYS_API Parser:public NonCopyable
 	{
-		NON_COPYABLE(Parser)
 	public:
 		Parser();
 		~Parser();

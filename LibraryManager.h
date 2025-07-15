@@ -3,22 +3,19 @@
 #include <functional>
 #include "Value.h"
 #include "Object.h"
-#include "Utils.h"
+#include "Common.h"
 namespace CynicScript
 {
-    class CYS_API LibraryManager
+    class CYS_API LibraryManager:public Singleton<LibraryManager>
     {
     public:
-        SINGLETON_DECL(LibraryManager)
+        void Init() override;
+        void Destroy() override;
 
         void RegisterLibrary(ClassObject *libraryClass);
-
         const std::vector<ClassObject *> &GetLibraries() const;
 
     private:
-        LibraryManager();
-        ~LibraryManager() = default;
-
         std::vector<ClassObject *> mLibraries;
     };
 }

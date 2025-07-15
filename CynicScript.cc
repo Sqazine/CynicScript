@@ -154,6 +154,8 @@ int32_t main(int32_t argc, const char *argv[])
 	if (ParseArgs(argc, argv) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
+	CynicScript::Init();
+
 	gLexer = new CynicScript::Lexer();
 	gParser = new CynicScript::Parser();
 	gAstOptimizePassManager = new CynicScript::AstOptimizePassManager();
@@ -175,6 +177,8 @@ int32_t main(int32_t argc, const char *argv[])
 	SAFE_DELETE(gAstOptimizePassManager);
 	SAFE_DELETE(gCompiler);
 	SAFE_DELETE(gVm);
+
+	CynicScript::Destroy();
 
 	return EXIT_SUCCESS;
 }
