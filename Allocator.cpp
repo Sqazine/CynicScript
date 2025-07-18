@@ -42,8 +42,7 @@ namespace CynicScript
         {
             Object *next = object->next;
             size_t objBytes = sizeof(*object);
-            mBytesAllocated -= objBytes;
-            SAFE_DELETE(object);
+            FreeObject(object);
             object = next;
         }
 
