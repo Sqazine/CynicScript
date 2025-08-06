@@ -915,8 +915,10 @@ namespace CynicScript
 	{
 		auto callee = (CallExpr *)expr->callee;
 		CompileExpr(callee->callee, RWState::READ);
-		EmitOpCode(OP_CALL, expr->callee->tagToken);
-		Emit(0);
+
+		EmitOpCode(OP_CLASS_INSTANCE, expr->callee->tagToken);
+		// EmitOpCode(OP_CALL, expr->callee->tagToken);
+		// Emit(0);
 		if (!callee->arguments.empty())
 		{
 			for (const auto &arg : callee->arguments)
@@ -1309,21 +1311,23 @@ namespace CynicScript
 	{
 		auto symbol = mSymbolTable->Define(decl->tagToken, Permission::IMMUTABLE, decl->name);
 
-		mFunctionList.emplace_back(new FunctionObject(decl->name));
+		// mFunctionList.emplace_back(new FunctionObject(decl->name));
 		mSymbolTable = new SymbolTable(mSymbolTable);
 
 		mSymbolTable->Define(decl->tagToken, Permission::IMMUTABLE, TEXT(""));
 
-		int8_t varCount = 0;
-		int8_t constCount = 0;
-		int8_t constructorCount = 0;
+		uint8_t enumCount =0;
+		uint8_t fnCount =0;
+		uint8_t varCount = 0;
+		uint8_t constCount = 0;
+		uint8_t constructorCount = 0;
 
 		for (const auto &enumeration : decl->enumerations)
 		{
 			auto decl = enumeration.second;
 			CompileEnumDecl(decl);
 			EmitConstant(new StrObject(decl->name->literal), decl->tagToken);
-			constCount++;
+			enumCount++;
 		}
 
 		for (const auto &function : decl->functions)
@@ -1333,7 +1337,7 @@ namespace CynicScript
 			{
 				CompileFunction(functionMember.decl, ClassDecl::FunctionKind::MEMBER);
 				EmitConstant(new StrObject(functionMember.decl->name->literal), decl->tagToken);
-				constCount++;
+				fnCount++;
 			}
 		}
 
@@ -1354,8 +1358,8 @@ namespace CynicScript
 		for (const auto &parent : decl->parents)
 		{
 			CompileIdentifierExpr(parent.second, RWState::READ);
-			EmitOpCode(OP_CALL, parent.second->tagToken);
-			Emit(0);
+			// EmitOpCode(OP_CALL, parent.second->tagToken);
+			// Emit(0);
 			EmitConstant(new StrObject(parent.second->literal), parent.second->tagToken);
 		}
 
@@ -1375,15 +1379,17 @@ namespace CynicScript
 		Emit(static_cast<uint8_t>(decl->parents.size()));
 		Emit(varCount);
 		Emit(constCount);
+		Emit(fnCount);
+		Emit(enumCount);
 
-		EmitReturn(1, decl->tagToken);
+		// EmitReturn(1, decl->tagToken);
 
 		mSymbolTable = mSymbolTable->enclosing;
 
-		auto function = mFunctionList.back();
-		mFunctionList.pop_back();
+		// auto function = mFunctionList.back();
+		// mFunctionList.pop_back();
 
-		EmitClosure(function, decl->tagToken);
+		// EmitClosure(function, decl->tagToken);
 
 		return symbol;
 	}

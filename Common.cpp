@@ -13,6 +13,13 @@ namespace CynicScript
     {
         Allocator::GetInstance()->Init();
         LibraryManager::GetInstance()->Init();
+
+        // Register built-in libraries
+        for(size_t i=0;i<LibraryManager::GetInstance()->GetLibraries().size();++i)
+        {
+            ModuleObject* lib = LibraryManager::GetInstance()->GetLibraries()[i];
+            Allocator::GetInstance()->SetGlobalVariable(i, lib);
+        }
     }
     void Destroy()
     {

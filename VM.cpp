@@ -657,29 +657,23 @@ namespace CynicScript
 						PUSH_CALL_FRAME(newframe);
 					}
 				}
-				else if (CYS_IS_CLASS_VALUE(callee)) // class constructor
+				else if (CYS_IS_CLASS_INSTANCE_VALUE(callee)) // class constructor(for initializing class instance)
 				{
-					auto klass = CYS_TO_CLASS_VALUE(callee);
-					// no user-defined constructor and calling none argument construction
-					// like: class A{} let a=new A();
-					// skip calling constructor(because class object has been instantiated)
-					if (argCount == 0 && klass->constructors.size() == 0)
-						break;
-					else
-					{
-						auto iter = klass->constructors.find(argCount);
-						if (iter == klass->constructors.end())
-							CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Not matching argument count of class: {}'s constructors."), klass->name);
+					auto classInstance = CYS_TO_CLASS_INSTANCE_VALUE(callee);
+					auto klass = classInstance->klass;
 
-						auto ctor = iter->second;
-						// init a new frame
-						CallFrame newframe;
-						newframe.closure = ctor;
-						newframe.ip = newframe.closure->function->chunk.opCodes.data();
-						newframe.slots = STACK_TOP() - argCount - 1;
+					auto iter = klass->constructors.find(argCount);
+					if (iter == klass->constructors.end())
+						CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Not matching argument count of class: {}'s constructors."), klass->name);
 
-						PUSH_CALL_FRAME(newframe);
-					}
+					auto ctor = iter->second;
+					// init a new frame
+					CallFrame newframe;
+					newframe.closure = ctor;
+					newframe.ip = newframe.closure->function->chunk.opCodes.data();
+					newframe.slots = STACK_TOP() - argCount - 1;
+
+					PUSH_CALL_FRAME(newframe);
 				}
 				else if (CYS_IS_NATIVE_FUNCTION_VALUE(callee)) // native function
 				{
@@ -705,6 +699,8 @@ namespace CynicScript
 				auto parentClassCount = READ_INS();
 				auto varCount = READ_INS();
 				auto constCount = READ_INS();
+				auto fnCount = READ_INS();
+				auto enumCount = READ_INS();
 
 				auto classObj = Allocator::GetInstance()->CreateObject<ClassObject>();
 
@@ -729,7 +725,7 @@ namespace CynicScript
 					name = POP_STACK();
 					auto v = POP_STACK();
 					v.permission = Permission::MUTABLE;
-					classObj->members[CYS_TO_STR_VALUE(name)->value] = v;
+					classObj->defaultMembers[CYS_TO_STR_VALUE(name)->value] = v;
 				}
 
 				for (int32_t i = 0; i < constCount; ++i)
@@ -737,10 +733,35 @@ namespace CynicScript
 					name = POP_STACK();
 					auto v = POP_STACK();
 					v.permission = Permission::IMMUTABLE;
-					classObj->members[CYS_TO_STR_VALUE(name)->value] = v;
+					classObj->defaultMembers[CYS_TO_STR_VALUE(name)->value] = v;
+				}
+
+				for (int32_t i = 0; i < fnCount; ++i)
+				{
+					name = POP_STACK();
+					auto v = POP_STACK();
+					v.permission = Permission::IMMUTABLE;
+					classObj->functions[CYS_TO_STR_VALUE(name)->value] = v;
+				}
+
+				for (int32_t i = 0; i < enumCount; ++i)
+				{
+					name = POP_STACK();
+					auto v = POP_STACK();
+					v.permission = Permission::IMMUTABLE;
+					classObj->enums[CYS_TO_STR_VALUE(name)->value] = v;
 				}
 
 				PUSH_STACK(classObj);
+				break;
+			}
+			case OP_CLASS_INSTANCE:
+			{
+				auto classObject = CYS_TO_CLASS_VALUE(POP_STACK());
+
+				auto instance = Allocator::GetInstance()->CreateObject<ClassInstanceObject>(classObject);
+
+				PUSH_STACK(instance);
 				break;
 			}
 			case OP_STRUCT:
@@ -780,6 +801,23 @@ namespace CynicScript
 					}
 					else
 						CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("No member: {} in class object:{}"), propName, klass->name);
+				}
+				else if (CYS_IS_CLASS_INSTANCE_VALUE(peekValue))
+				{
+					ClassInstanceObject *classInstance = CYS_TO_CLASS_INSTANCE_VALUE(peekValue);
+
+					Value member;
+					if (classInstance->GetMember(propName, member))
+					{
+						POP_STACK(); // pop class object
+						if (CYS_IS_CLOSURE_VALUE(member))
+							member = Allocator::GetInstance()->CreateObject<ClassClosureBindObject>(classInstance, CYS_TO_CLOSURE_VALUE(member));
+
+						PUSH_STACK(member);
+						break;
+					}
+					else
+						CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("No member: {} in class object:{}"), propName, classInstance->klass->name);
 				}
 				else if (CYS_IS_ENUM_VALUE(peekValue))
 				{
@@ -842,10 +880,26 @@ namespace CynicScript
 						if (member.permission == Permission::IMMUTABLE)
 							CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Constant cannot be assigned twice: {}'s member: {} is a constant value"), klass->name, propName);
 						else
-							klass->members[propName] = PEEK_STACK(0);
+							klass->defaultMembers[propName] = PEEK_STACK(0);
 					}
 					else
 						CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("No member named: {} in class: {}"), propName, klass->name);
+				}
+				else if (CYS_IS_CLASS_INSTANCE_VALUE(peekValue))
+				{
+					auto classInstance = CYS_TO_CLASS_INSTANCE_VALUE(peekValue);
+					POP_STACK(); // pop class value
+
+					Value member;
+					if (classInstance->GetMember(propName, member))
+					{
+						if (member.permission == Permission::IMMUTABLE)
+							CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("Constant cannot be assigned twice: {}'s member: {} is a constant value"), classInstance->klass->name, propName);
+						else
+							classInstance->members[propName] = PEEK_STACK(0);
+					}
+					else
+						CYS_LOG_ERROR_WITH_LOC(relatedToken, TEXT("No member named: {} in class: {}"), propName, classInstance->klass->name);
 				}
 				else if (CYS_IS_STRUCT_VALUE(peekValue))
 				{
@@ -1014,7 +1068,7 @@ namespace CynicScript
 					nameStr = CYS_TO_STR_VALUE(name)->value;
 					auto v = POP_STACK();
 					v.permission = Permission::IMMUTABLE;
-					moduleObj->values[nameStr] = v;
+					moduleObj->members[nameStr] = v;
 				}
 
 				for (int32_t i = 0; i < varCount; ++i)
@@ -1023,7 +1077,7 @@ namespace CynicScript
 					nameStr = CYS_TO_STR_VALUE(name)->value;
 					auto v = POP_STACK();
 					v.permission = Permission::MUTABLE;
-					moduleObj->values[nameStr] = v;
+					moduleObj->members[nameStr] = v;
 				}
 
 				PUSH_STACK(moduleObj);

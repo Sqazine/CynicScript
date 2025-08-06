@@ -62,7 +62,7 @@
 
 namespace CynicScript
 {
-    void LibraryManager::RegisterLibrary(ClassObject *libraryClass)
+    void LibraryManager::RegisterLibrary(ModuleObject *libraryClass)
     {
         for (const auto &lib : mLibraries)
         {
@@ -73,7 +73,7 @@ namespace CynicScript
         mLibraries.emplace_back(libraryClass);
     }
 
-    const std::vector<ClassObject *> &LibraryManager::GetLibraries() const
+    const std::vector<ModuleObject *> &LibraryManager::GetLibraries() const
     {
         return mLibraries;
     }
@@ -227,26 +227,26 @@ namespace CynicScript
                                                                 return true;
                                                             });
 
-        auto ioClass = new ClassObject(TEXT("io"));
-        auto dsClass = new ClassObject(TEXT("ds"));
-        auto memClass = new ClassObject(TEXT("mem"));
-        auto timeClass = new ClassObject(TEXT("time"));
+        auto ioModule = new ModuleObject(TEXT("io"));
+        auto dsModule = new ModuleObject(TEXT("ds"));
+        auto memModule = new ModuleObject(TEXT("mem"));
+        auto timeModule = new ModuleObject(TEXT("time"));
 
-        ioClass->members[TEXT("print")] = new NativeFunctionObject(PRINT_LAMBDA(Logger::Print));
-        ioClass->members[TEXT("println")] = new NativeFunctionObject(PRINT_LAMBDA(Logger::Println));
+        ioModule->members[TEXT("print")] = new NativeFunctionObject(PRINT_LAMBDA(Logger::Print));
+        ioModule->members[TEXT("println")] = new NativeFunctionObject(PRINT_LAMBDA(Logger::Println));
 
-        dsClass->members[TEXT("sizeof")] = SizeOfFunction;
-        dsClass->members[TEXT("insert")] = InsertFunction;
-        dsClass->members[TEXT("erase")] = EraseFunction;
+        dsModule->members[TEXT("sizeof")] = SizeOfFunction;
+        dsModule->members[TEXT("insert")] = InsertFunction;
+        dsModule->members[TEXT("erase")] = EraseFunction;
 
-        memClass->members[TEXT("addressof")] = AddressOfFunction;
+        memModule->members[TEXT("addressof")] = AddressOfFunction;
 
-        timeClass->members[TEXT("clock")] = ClockFunction;
+        timeModule->members[TEXT("clock")] = ClockFunction;
 
-        mLibraries.emplace_back(ioClass);
-        mLibraries.emplace_back(dsClass);
-        mLibraries.emplace_back(memClass);
-        mLibraries.emplace_back(timeClass);
+        mLibraries.emplace_back(ioModule);
+        mLibraries.emplace_back(dsModule);
+        mLibraries.emplace_back(memModule);
+        mLibraries.emplace_back(timeModule);
     }
 
     void LibraryManager::Destroy()

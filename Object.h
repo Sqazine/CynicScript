@@ -19,6 +19,7 @@ namespace CynicScript
 #define CYS_IS_NATIVE_FUNCTION_OBJ(obj) ((obj)->kind == ::CynicScript::ObjectKind::NATIVE_FUNCTION)
 #define CYS_IS_REF_OBJ(obj) ((obj)->kind == ::CynicScript::ObjectKind::REF)
 #define CYS_IS_CLASS_OBJ(obj) ((obj)->kind == ::CynicScript::ObjectKind::CLASS)
+#define CYS_IS_CLASS_INSTANCE_OBJ(obj) ((obj)->kind == ::CynicScript::ObjectKind::CLASS_INSTANCE)
 #define CYS_IS_CLASS_CLOSURE_BIND_OBJ(obj) ((obj)->kind == ::CynicScript::ObjectKind::CLASS_CLOSURE_BIND)
 #define CYS_IS_ENUM_OBJ(obj) ((obj)->kind == ::CynicScript::ObjectKind::ENUM)
 #define CYS_IS_MODULE_OBJ(obj) ((obj)->kind == ::CynicScript::ObjectKind::MODULE)
@@ -33,6 +34,7 @@ namespace CynicScript
 #define CYS_TO_NATIVE_FUNCTION_OBJ(obj) ((::CynicScript::NativeFunctionObject *)(obj))
 #define CYS_TO_REF_OBJ(obj) ((::CynicScript::RefObject *)(obj))
 #define CYS_TO_CLASS_OBJ(obj) ((::CynicScript::ClassObject *)(obj))
+#define CYS_TO_CLASS_INSTANCE_OBJ(obj) ((::CynicScript::ClassInstanceObject *)(obj))
 #define CYS_TO_CLASS_CLOSURE_BIND_OBJ(obj) ((::CynicScript::ClassClosureBindObject *)(obj))
 #define CYS_TO_ENUM_OBJ(obj) ((::CynicScript::EnumObject *)(obj))
 #define CYS_TO_MODULE_OBJ(obj) ((::CynicScript::ModuleObject *)(obj))
@@ -52,6 +54,7 @@ namespace CynicScript
 #define CYS_IS_NATIVE_FUNCTION_VALUE(v) (CYS_IS_OBJECT_VALUE(v) && CYS_IS_NATIVE_FUNCTION_OBJ((v).object))
 #define CYS_IS_REF_VALUE(v) (CYS_IS_OBJECT_VALUE(v) && CYS_IS_REF_OBJ((v).object))
 #define CYS_IS_CLASS_VALUE(v) (CYS_IS_OBJECT_VALUE(v) && CYS_IS_CLASS_OBJ((v).object))
+#define CYS_IS_CLASS_INSTANCE_VALUE(v) (CYS_IS_OBJECT_VALUE(v) && CYS_IS_CLASS_INSTANCE_OBJ((v).object))
 #define CYS_IS_CLASS_CLOSURE_BIND_VALUE(v) (CYS_IS_OBJECT_VALUE(v) && CYS_IS_CLASS_CLOSURE_BIND_OBJ((v).object))
 #define CYS_IS_ENUM_VALUE(v) (CYS_IS_OBJECT_VALUE(v) && CYS_IS_ENUM_OBJ((v).object))
 #define CYS_IS_MODULE_VALUE(v) (CYS_IS_OBJECT_VALUE(v) && CYS_IS_MODULE_OBJ((v).object))
@@ -70,6 +73,7 @@ namespace CynicScript
 #define CYS_TO_NATIVE_FUNCTION_VALUE(v) (CYS_TO_NATIVE_FUNCTION_OBJ((v).object))
 #define CYS_TO_REF_VALUE(v) (CYS_TO_REF_OBJ((v).object))
 #define CYS_TO_CLASS_VALUE(v) (CYS_TO_CLASS_OBJ((v).object))
+#define CYS_TO_CLASS_INSTANCE_VALUE(v) (CYS_TO_CLASS_INSTANCE_OBJ((v).object))
 #define CYS_TO_CLASS_CLOSURE_BIND_VALUE(v) (CYS_TO_CLASS_CLOSURE_BIND_OBJ((v).object))
 #define CYS_TO_ENUM_VALUE(v) (CYS_TO_ENUM_OBJ((v).object))
 #define CYS_TO_MODULE_VALUE(v) (CYS_TO_MODULE_OBJ((v).object))
@@ -86,6 +90,7 @@ namespace CynicScript
         NATIVE_FUNCTION,
         REF,
         CLASS,
+        CLASS_INSTANCE,
         CLASS_CLOSURE_BIND,
         ENUM,
         MODULE
@@ -96,9 +101,10 @@ namespace CynicScript
         Object(ObjectKind kind);
         virtual ~Object() = default;
 
-        virtual STRING ToString() const = 0;
         void Mark();
         void UnMark();
+
+        virtual STRING ToString() const = 0;
         virtual void Blacken();
         virtual bool IsEqualTo(Object *other) = 0;
         virtual std::vector<uint8_t> Serialize() const = 0;
@@ -141,7 +147,6 @@ namespace CynicScript
         ~DictObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -156,7 +161,6 @@ namespace CynicScript
         ~StructObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -174,7 +178,6 @@ namespace CynicScript
 #ifndef NDEBUG
         STRING ToStringWithChunk() const;
 #endif
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -199,7 +202,6 @@ namespace CynicScript
         ~UpValueObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -216,7 +218,6 @@ namespace CynicScript
         ~ClosureObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -234,7 +235,6 @@ namespace CynicScript
         ~NativeFunctionObject() override = default;
 
         STRING ToString() const override;
-
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
 
@@ -247,7 +247,6 @@ namespace CynicScript
         ~RefObject() override = default;
 
         STRING ToString() const override;
-
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
 
@@ -261,7 +260,6 @@ namespace CynicScript
         ~ClassObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -271,8 +269,30 @@ namespace CynicScript
 
         STRING name{};
         std::map<int32_t, ClosureObject *> constructors{}; // argument count as key for now
-        std::unordered_map<STRING, Value> members{};
+        std::unordered_map<STRING, Value> defaultMembers{};
+        std::unordered_map<STRING, Value> functions{};
+        std::unordered_map<STRING, Value> enums{};
         std::map<STRING, ClassObject *> parents{};
+    };
+
+    struct CYS_API ClassInstanceObject : public Object
+    {
+        ClassInstanceObject();
+        ClassInstanceObject(ClassObject *klass);
+        ~ClassInstanceObject() override = default;
+        
+        STRING ToString() const override;
+        void Blacken() override;
+        bool IsEqualTo(Object *other) override;
+        std::vector<uint8_t> Serialize() const override;
+
+        bool GetMember(const STRING &name, Value &retV);
+
+        void ObtainParentMembers(ClassObject *classObj);
+
+        ClassObject *klass;
+        std::unordered_map<STRING, Value> members{};
+        std::map<STRING, std::unordered_map<STRING,Value>> parentMembers{};//collect parent members
     };
 
     struct CYS_API ClassClosureBindObject : public Object
@@ -282,12 +302,11 @@ namespace CynicScript
         ~ClassClosureBindObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
 
-        Value receiver{};
+        Value receiver{};//ClassObject or CLassInstanceObject
         ClosureObject *closure{nullptr};
     };
 
@@ -298,7 +317,6 @@ namespace CynicScript
         ~EnumObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -312,11 +330,10 @@ namespace CynicScript
     struct CYS_API ModuleObject : public Object
     {
         ModuleObject();
-        ModuleObject(const STRING &name, const std::unordered_map<STRING, Value> &values);
+        ModuleObject(const STRING &name, const std::unordered_map<STRING, Value> &members={});
         ~ModuleObject() override = default;
 
         STRING ToString() const override;
-
         void Blacken() override;
         bool IsEqualTo(Object *other) override;
         std::vector<uint8_t> Serialize() const override;
@@ -324,6 +341,6 @@ namespace CynicScript
         bool GetMember(const STRING &name, Value &retV);
 
         STRING name{};
-        std::unordered_map<STRING, Value> values{};
+        std::unordered_map<STRING, Value> members{};
     };
 }

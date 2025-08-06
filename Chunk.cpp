@@ -159,6 +159,7 @@ namespace CynicScript
 				CASE(OP_GET_BASE)
 				CASE(OP_SET_PROPERTY)
 				CASE(OP_GET_PROPERTY)
+				CASE(OP_CLASS_INSTANCE)
 				CASE_JUMP(OP_JUMP_IF_FALSE, +)
 				CASE_JUMP(OP_JUMP, +)
 				CASE_JUMP(OP_LOOP, -)
@@ -203,10 +204,12 @@ namespace CynicScript
 				auto parentClassCount = opcodes[++i];
 				auto varCount = opcodes[++i];
 				auto constCount = opcodes[++i];
+				auto fnCount = opcodes[++i];
+				auto enumCount = opcodes[++i];
 				auto tokStr = tok->ToString();
 				STRING tokGap(maxTokenShowSize - tokStr.size(), TCHAR(' '));
 				tokStr += tokGap;
-				stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\tOP_CLASS\t") << constructorCount << TEXT("\t") << parentClassCount << TEXT("\t") << varCount << TEXT("\t") << constCount << TEXT("\t") << std::endl;
+				stream << tokStr << std::setfill(TCHAR('0')) << std::setw(8) << i << TEXT("\tOP_CLASS\t") << constructorCount << TEXT("\t") << parentClassCount << TEXT("\t") << varCount << TEXT("\t") << constCount << TEXT("\t") << fnCount << TEXT("\t") << enumCount << TEXT("\t") << std::endl;
 				break;
 			}
 			case OP_CLOSURE:

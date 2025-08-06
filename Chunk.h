@@ -49,6 +49,7 @@ namespace CynicScript
         OP_REF_INDEX_UPVALUE,
         OP_CALL,
         OP_CLASS,
+        OP_CLASS_INSTANCE,
         OP_STRUCT,
         OP_SET_PROPERTY,
         OP_GET_PROPERTY,

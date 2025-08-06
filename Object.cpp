@@ -468,7 +468,7 @@ namespace CynicScript
 			result = result.substr(0, result.size() - 1);
 		}
 		result += TEXT("\n{\n");
-		for (const auto &[k, v] : members)
+		for (const auto &[k, v] : defaultMembers)
 			result += TEXT("  ") + k + TEXT(":") + v.ToString() + TEXT("\n");
 
 		return result + TEXT("}\n");
@@ -477,7 +477,7 @@ namespace CynicScript
 	void ClassObject::Blacken()
 	{
 		Object::Blacken();
-		for (auto &[k, v] : members)
+		for (auto &[k, v] : defaultMembers)
 			v.Mark();
 		for (auto &[k, v] : parents)
 			v->Mark();
@@ -492,7 +492,7 @@ namespace CynicScript
 		auto klass = CYS_TO_CLASS_OBJ(other);
 		if (name != klass->name)
 			return false;
-		if (members != klass->members)
+		if (defaultMembers != klass->defaultMembers)
 			return false;
 		if (parents != klass->parents)
 			return false;
@@ -507,30 +507,31 @@ namespace CynicScript
 
 	bool ClassObject::GetMember(const STRING &name, Value &retV)
 	{
-		auto iter = members.find(name);
-		if (iter != members.end())
 		{
-			retV = iter->second;
-			return true;
-		}
-		else if (!parents.empty())
-		{
-			bool hasValue = false;
-			for (const auto &[k, v] : parents)
+			auto iter = defaultMembers.find(name);
+			if (iter != defaultMembers.end())
 			{
-				if (name == k)
-				{
-					retV = v;
-					hasValue = true;
-				}
-				else
-				{
-					hasValue = v->GetMember(name, retV);
-				}
+				retV = iter->second;
+				return true;
 			}
-			return hasValue;
 		}
-		return false;
+		{
+			auto iter = functions.find(name);
+			if (iter != functions.end())
+			{
+				retV = iter->second;
+				return true;
+			}
+		}
+		{
+			auto iter = enums.find(name);
+			if (iter != enums.end())
+			{
+				retV = iter->second;
+				return true;
+			}
+		}
+		return GetParentMember(name, retV);
 	}
 
 	bool ClassObject::GetParentMember(const STRING &name, Value &retV)
@@ -553,6 +554,84 @@ namespace CynicScript
 			return hasValue;
 		}
 		return false;
+	}
+
+	ClassInstanceObject::ClassInstanceObject()
+		: Object(ObjectKind::CLASS_INSTANCE), klass(nullptr)
+	{
+	}
+
+	ClassInstanceObject::ClassInstanceObject(ClassObject *klass)
+		: Object(ObjectKind::CLASS_INSTANCE), klass(klass)
+	{
+		if (!klass->defaultMembers.empty())
+			members = klass->defaultMembers;
+
+		ObtainParentMembers(klass);
+	}
+
+	STRING ClassInstanceObject::ToString() const
+	{
+		return TEXT("<instance of ") + klass->name + TEXT(":0x") + PointerAddressToString((void *)this) + TEXT(">\n{\n");
+	}
+
+	void ClassInstanceObject::Blacken()
+	{
+		Object::Blacken();
+		for (auto &[k, v] : members)
+			v.Mark();
+	}
+
+	bool ClassInstanceObject::IsEqualTo(Object *other)
+	{
+		if (!CYS_IS_CLASS_INSTANCE_OBJ(other))
+			return false;
+		auto klassInstance = CYS_TO_CLASS_INSTANCE_OBJ(other);
+		if (members != klassInstance->members)
+			return false;
+		return true;
+	}
+
+	std::vector<uint8_t> ClassInstanceObject::Serialize() const
+	{
+		// TODO: Not finished yet, need to handle enum serialization
+		return std::vector<uint8_t>();
+	}
+
+	bool ClassInstanceObject::GetMember(const STRING &name, Value &retV)
+	{
+		{
+			auto iter = members.find(name);
+			if (iter != members.end())
+			{
+				retV = iter->second;
+				return true;
+			}
+		}
+		{
+			for(const auto& [name,memberPair]:parentMembers)
+			{
+				auto iter = memberPair.find(name);
+				if (iter != memberPair.end())
+				{
+					retV = iter->second;
+					return true;
+				}
+			}
+		}
+
+		return klass->GetMember(name,retV);
+	}
+
+	void ClassInstanceObject::ObtainParentMembers(ClassObject *classObj)
+	{
+		if(classObj->parents.empty())
+			return;
+		for(const auto &[name, parent] : classObj->parents)
+		{
+			parentMembers[name] = parent->defaultMembers;
+			ObtainParentMembers(parent);
+		}
 	}
 
 	ClassClosureBindObject::ClassClosureBindObject()
@@ -655,17 +734,17 @@ namespace CynicScript
 	{
 	}
 
-	ModuleObject::ModuleObject(const STRING &name, const std::unordered_map<STRING, Value> &values)
-		: Object(ObjectKind::MODULE), name(name), values(values)
+	ModuleObject::ModuleObject(const STRING &name, const std::unordered_map<STRING, Value> &members)
+		: Object(ObjectKind::MODULE), name(name), members(members)
 	{
 	}
 
 	STRING ModuleObject::ToString() const
 	{
 		STRING result = TEXT("module ") + name + TEXT("{");
-		if (!values.empty())
+		if (!members.empty())
 		{
-			for (const auto &[k, v] : values)
+			for (const auto &[k, v] : members)
 				result += k + TEXT("=") + v.ToString() + TEXT(",");
 			result = result.substr(0, result.size() - 1);
 		}
@@ -675,7 +754,7 @@ namespace CynicScript
 	void ModuleObject::Blacken()
 	{
 		Object::Blacken();
-		for (auto &[k, v] : values)
+		for (auto &[k, v] : members)
 			v.Mark();
 	}
 
@@ -686,7 +765,7 @@ namespace CynicScript
 		auto eo = CYS_TO_MODULE_OBJ(other);
 		if (name != eo->name)
 			return false;
-		if (values != eo->values)
+		if (members != eo->members)
 			return false;
 		return true;
 	}
@@ -699,13 +778,12 @@ namespace CynicScript
 
 	bool ModuleObject::GetMember(const STRING &name, Value &retV)
 	{
-		auto iter = values.find(name);
-		if (iter != values.end())
+		auto iter = members.find(name);
+		if (iter != members.end())
 		{
 			retV = iter->second;
 			return true;
 		}
 		return false;
 	}
-
 }

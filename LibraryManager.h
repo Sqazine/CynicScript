@@ -12,10 +12,10 @@ namespace CynicScript
         void Init() override;
         void Destroy() override;
 
-        void RegisterLibrary(ClassObject *libraryClass);
-        const std::vector<ClassObject *> &GetLibraries() const;
+        void RegisterLibrary(ModuleObject *libraryClass);
+        const std::vector<ModuleObject *> &GetLibraries() const;
 
     private:
-        std::vector<ClassObject *> mLibraries;
+        std::vector<ModuleObject *> mLibraries;
     };
 }
